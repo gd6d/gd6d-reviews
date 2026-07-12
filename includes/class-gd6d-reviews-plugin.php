@@ -41,6 +41,7 @@ final class GD6D_Reviews_Plugin {
 
 		GD6D_Reviews_Settings::instance()->register();
 		GD6D_Reviews_Shortcode::instance()->register();
+		GD6D_Reviews_Block::instance()->register();
 	}
 
 	public function load_textdomain(): void {
