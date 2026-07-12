@@ -10,20 +10,63 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class GD6D_Reviews_Google_Provider {
+
 	private const API_BASE_URL = 'https://places.googleapis.com/v1/places/';
 
 	/**
-	 * Test the Google Places connection and return basic place data.
+	 * Retourne les données Google depuis le cache ou depuis l’API.
 	 *
-	 * @return array|WP_Error Place data on success, WP_Error on failure.
+	 * @return array|WP_Error
+	 */
+	public static function get_place_data() {
+		$cached_data = GD6D_Reviews_Cache::get();
+
+		if ( false !== $cached_data && is_array( $cached_data ) ) {
+			$cached_data['source'] = 'cache';
+
+			return $cached_data;
+		}
+
+		$data = self::fetch_from_google();
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		GD6D_Reviews_Cache::set( $data );
+
+		$data['source'] = 'google';
+
+		return $data;
+	}
+
+	/**
+	 * Teste la connexion Google.
+	 *
+	 * Pour le moment, le test utilise aussi le cache afin de vérifier
+	 * le fonctionnement complet du circuit.
+	 *
+	 * @return array|WP_Error
 	 */
 	public static function test_connection() {
+		return self::get_place_data();
+	}
+
+	/**
+	 * Récupère les données directement depuis Google Places.
+	 *
+	 * @return array|WP_Error
+	 */
+	private static function fetch_from_google() {
 		$settings = wp_parse_args(
 			get_option( GD6D_Reviews_Settings::OPTION_NAME, array() ),
 			GD6D_Reviews_Settings::defaults()
 		);
 
-		$api_key  = defined( 'GD6D_REVIEWS_API_KEY' ) ? GD6D_REVIEWS_API_KEY : $settings['api_key'];
+		$api_key = defined( 'GD6D_REVIEWS_API_KEY' )
+			? GD6D_REVIEWS_API_KEY
+			: $settings['api_key'];
+
 		$place_id = $settings['place_id'];
 
 		if ( empty( $api_key ) ) {
@@ -96,6 +139,7 @@ final class GD6D_Reviews_Google_Provider {
 			'rating'       => isset( $body['rating'] ) ? (float) $body['rating'] : null,
 			'review_count' => isset( $body['userRatingCount'] ) ? absint( $body['userRatingCount'] ) : 0,
 			'maps_url'     => isset( $body['googleMapsUri'] ) ? esc_url_raw( $body['googleMapsUri'] ) : '',
+			'fetched_at'   => time(),
 		);
 	}
 }
