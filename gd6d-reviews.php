@@ -26,6 +26,7 @@ require_once GD6D_REVIEWS_DIR . 'includes/class-gd6d-reviews-plugin.php';
 require_once GD6D_REVIEWS_DIR . 'includes/class-gd6d-reviews-settings.php';
 require_once GD6D_REVIEWS_DIR . 'includes/class-gd6d-reviews-google-provider.php';
 require_once GD6D_REVIEWS_DIR . 'includes/class-gd6d-reviews-shortcode.php';
+require_once GD6D_REVIEWS_DIR . 'includes/class-gd6d-reviews-cache.php';
 
 register_activation_hook( __FILE__, array( 'GD6D_Reviews_Plugin', 'activate' ) );
 
