@@ -1,0 +1,18 @@
+.gd6d-reviews {
+	box-sizing: border-box;
+}
+
+.gd6d-reviews--placeholder {
+	padding: 1.25rem;
+	border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+	border-radius: 0.75rem;
+}
+
+.gd6d-reviews--placeholder p:last-child {
+	margin-bottom: 0;
+}
+
+.gd6d-reviews__debug {
+	font-size: 0.875em;
+	opacity: 0.7;
+}
