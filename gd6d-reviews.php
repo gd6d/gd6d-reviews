@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Gd6d Reviews
  * Plugin URI:        https://gd6d.fr/
- * Description:       Affiche des avis clients depuis des services externes. Première intégration prévue : Google Places.
- * Version:           0.2.0
+ * Description:       Affiche des avis clients depuis Google Places avec un cache WordPress.
+ * Version:           0.4.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Gd6d
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GD6D_REVIEWS_VERSION', '0.2.0' );
+define( 'GD6D_REVIEWS_VERSION', '0.4.0' );
 define( 'GD6D_REVIEWS_FILE', __FILE__ );
 define( 'GD6D_REVIEWS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GD6D_REVIEWS_URL', plugin_dir_url( __FILE__ ) );
