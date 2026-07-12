@@ -91,7 +91,7 @@ final class GD6D_Reviews_Google_Provider {
 				'timeout' => 15,
 				'headers' => array(
 					'X-Goog-Api-Key'   => $api_key,
-					'X-Goog-FieldMask' => 'id,displayName,rating,userRatingCount,googleMapsUri',
+					'X-Goog-FieldMask' => 'id,displayName,rating,userRatingCount,googleMapsUri,reviews',
 				),
 			)
 		);
@@ -133,13 +133,14 @@ final class GD6D_Reviews_Google_Provider {
 			);
 		}
 
-		return array(
-			'id'           => sanitize_text_field( $body['id'] ?? $place_id ),
-			'name'         => sanitize_text_field( $body['displayName']['text'] ),
-			'rating'       => isset( $body['rating'] ) ? (float) $body['rating'] : null,
-			'review_count' => isset( $body['userRatingCount'] ) ? absint( $body['userRatingCount'] ) : 0,
-			'maps_url'     => isset( $body['googleMapsUri'] ) ? esc_url_raw( $body['googleMapsUri'] ) : '',
-			'fetched_at'   => time(),
-		);
+return array(
+    'id'           => sanitize_text_field( $body['id'] ?? $place_id ),
+    'name'         => sanitize_text_field( $body['displayName']['text'] ),
+    'rating'       => isset( $body['rating'] ) ? (float) $body['rating'] : null,
+    'review_count' => isset( $body['userRatingCount'] ) ? absint( $body['userRatingCount'] ) : 0,
+    'maps_url'     => isset( $body['googleMapsUri'] ) ? esc_url_raw( $body['googleMapsUri'] ) : '',
+    'reviews'      => $body['reviews'] ?? array(),
+    'fetched_at'   => time(),
+);
 	}
 }

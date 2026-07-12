@@ -197,11 +197,55 @@ final class GD6D_Reviews_Settings {
 		?>
 		<div class="notice notice-success">
 			<p><strong><?php esc_html_e( 'Connexion Google réussie.', 'gd6d-reviews' ); ?></strong></p>
-			<ul>
-				<li><strong><?php esc_html_e( 'Établissement :', 'gd6d-reviews' ); ?></strong> <?php echo esc_html( $data['name'] ); ?></li>
-				<li><strong><?php esc_html_e( 'Note :', 'gd6d-reviews' ); ?></strong> <?php echo null !== $data['rating'] ? esc_html( number_format_i18n( $data['rating'], 1 ) ) . '/5' : esc_html__( 'non disponible', 'gd6d-reviews' ); ?></li>
-				<li><strong><?php esc_html_e( 'Nombre d’avis :', 'gd6d-reviews' ); ?></strong> <?php echo esc_html( number_format_i18n( $data['review_count'] ) ); ?></li>
-			</ul>
+<ul>
+	<li>
+		<strong><?php esc_html_e( 'Établissement :', 'gd6d-reviews' ); ?></strong>
+		<?php echo esc_html( $data['name'] ?? '' ); ?>
+	</li>
+
+	<li>
+		<strong><?php esc_html_e( 'Note :', 'gd6d-reviews' ); ?></strong>
+		<?php
+		echo isset( $data['rating'] ) && null !== $data['rating']
+			? esc_html( number_format_i18n( $data['rating'], 1 ) ) . '/5'
+			: esc_html__( 'non disponible', 'gd6d-reviews' );
+		?>
+	</li>
+
+	<li>
+		<strong><?php esc_html_e( 'Nombre d’avis :', 'gd6d-reviews' ); ?></strong>
+		<?php echo esc_html( number_format_i18n( $data['review_count'] ?? 0 ) ); ?>
+	</li>
+
+	<li>
+		<strong><?php esc_html_e( 'Source :', 'gd6d-reviews' ); ?></strong>
+		<?php
+		echo esc_html(
+			'cache' === ( $data['source'] ?? '' )
+				? __( 'Cache WordPress', 'gd6d-reviews' )
+				: __( 'Google Places API', 'gd6d-reviews' )
+		);
+		?>
+	</li>
+
+	<li>
+		<strong><?php esc_html_e( 'Dernière synchronisation :', 'gd6d-reviews' ); ?></strong>
+		<?php
+		echo ! empty( $data['fetched_at'] )
+			? esc_html(
+				wp_date(
+					get_option( 'date_format' ) . ' ' . get_option( 'time_format' ),
+					(int) $data['fetched_at']
+				)
+			)
+			: '—';
+		?>
+	</li>
+	<li>
+	<strong><?php esc_html_e( 'Avis récupérés :', 'gd6d-reviews' ); ?></strong>
+	<?php echo esc_html( count( $data['reviews'] ?? array() ) ); ?>
+</li>
+</ul>
 		</div>
 		<?php
 	}
