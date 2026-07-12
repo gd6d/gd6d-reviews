@@ -83,7 +83,12 @@ final class GD6D_Reviews_Google_Provider {
 			);
 		}
 
-		$url = self::API_BASE_URL . rawurlencode( $place_id );
+		$url = add_query_arg(
+	array(
+		'languageCode' => 'fr',
+	),
+	self::API_BASE_URL . rawurlencode( $place_id )
+);
 
 		$response = wp_remote_get(
 			$url,

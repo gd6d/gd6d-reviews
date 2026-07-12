@@ -146,7 +146,6 @@ final class GD6D_Reviews_Settings {
 		}
 
 		check_admin_referer( self::TEST_ACTION );
-
 		$result = GD6D_Reviews_Google_Provider::test_connection();
 		$key    = self::TEST_RESULT_TRANSIENT . get_current_user_id();
 

@@ -97,7 +97,43 @@ final class GD6D_Reviews_Shortcode {
 						?? $review['text']['text']
 						?? '';
 						$rating = isset( $review['rating'] ) ? (int) $review['rating'] : 0;
-						$date   = $review['relativePublishTimeDescription'] ?? '';
+$date = '';
+
+if ( ! empty( $review['publishTime'] ) ) {
+	$published_timestamp = strtotime( $review['publishTime'] );
+
+	if ( false !== $published_timestamp ) {
+		$seconds = max( 0, current_time( 'timestamp' ) - $published_timestamp );
+
+		if ( $seconds >= YEAR_IN_SECONDS ) {
+			$value = (int) floor( $seconds / YEAR_IN_SECONDS );
+			$date  = sprintf(
+				_n( 'Il y a %d an', 'Il y a %d ans', $value, 'gd6d-reviews' ),
+				$value
+			);
+		} elseif ( $seconds >= MONTH_IN_SECONDS ) {
+			$value = (int) floor( $seconds / MONTH_IN_SECONDS );
+			$date  = sprintf(
+				_n( 'Il y a %d mois', 'Il y a %d mois', $value, 'gd6d-reviews' ),
+				$value
+			);
+		} elseif ( $seconds >= WEEK_IN_SECONDS ) {
+			$value = (int) floor( $seconds / WEEK_IN_SECONDS );
+			$date  = sprintf(
+				_n( 'Il y a %d semaine', 'Il y a %d semaines', $value, 'gd6d-reviews' ),
+				$value
+			);
+		} elseif ( $seconds >= DAY_IN_SECONDS ) {
+			$value = (int) floor( $seconds / DAY_IN_SECONDS );
+			$date  = sprintf(
+				_n( 'Il y a %d jour', 'Il y a %d jours', $value, 'gd6d-reviews' ),
+				$value
+			);
+		} else {
+			$date = __( 'Aujourd’hui', 'gd6d-reviews' );
+		}
+	}
+}
 						?>
 						<li class="gd6d-reviews__item">
 							<article class="gd6d-review">
