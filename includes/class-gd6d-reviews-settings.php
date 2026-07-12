@@ -121,7 +121,7 @@ final class GD6D_Reviews_Settings {
 			);
 			if ( 'cache_days' === $key ) {
 				echo '<p class="description">' . esc_html__( '7 jours par défaut.', 'gd6d-reviews' ) . '</p>';
-			} 
+			}
 			return;
 		}
 
@@ -200,35 +200,7 @@ final class GD6D_Reviews_Settings {
 			<ul>
 				<li><strong><?php esc_html_e( 'Établissement :', 'gd6d-reviews' ); ?></strong> <?php echo esc_html( $data['name'] ); ?></li>
 				<li><strong><?php esc_html_e( 'Note :', 'gd6d-reviews' ); ?></strong> <?php echo null !== $data['rating'] ? esc_html( number_format_i18n( $data['rating'], 1 ) ) . '/5' : esc_html__( 'non disponible', 'gd6d-reviews' ); ?></li>
-				<li>
-	<strong><?php esc_html_e( 'Nombre d’avis :', 'gd6d-reviews' ); ?></strong>
-	<?php echo esc_html( number_format_i18n( $data['review_count'] ) ); ?>
-</li>
-
-<li>
-	<strong><?php esc_html_e( 'Source :', 'gd6d-reviews' ); ?></strong>
-	<?php
-	echo esc_html(
-		( $data['source'] ?? '' ) === 'cache'
-			? __( 'Cache WordPress', 'gd6d-reviews' )
-			: __( 'Google Places API', 'gd6d-reviews' )
-	);
-	?>
-</li>
-
-<li>
-	<strong><?php esc_html_e( 'Dernière synchronisation :', 'gd6d-reviews' ); ?></strong>
-	<?php
-	echo ! empty( $data['fetched_at'] )
-		? esc_html(
-			wp_date(
-				get_option( 'date_format' ) . ' ' . get_option( 'time_format' ),
-				(int) $data['fetched_at']
-			)
-		)
-		: '—';
-	?>
-</li>
+				<li><strong><?php esc_html_e( 'Nombre d’avis :', 'gd6d-reviews' ); ?></strong> <?php echo esc_html( number_format_i18n( $data['review_count'] ) ); ?></li>
 			</ul>
 		</div>
 		<?php
