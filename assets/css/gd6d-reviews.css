@@ -91,12 +91,21 @@
 
 .gd6d-reviews__carousel {
 	position: relative;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	isolation: isolate;
 }
 
 .gd6d-reviews__viewport {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
 	min-width: 0;
-	overflow: hidden;
+	overflow: hidden !important;
+	overflow: clip !important;
 	border-radius: var(--gd6d-reviews-radius);
+	contain: paint;
 }
 
 .gd6d-reviews__viewport:focus-visible {
@@ -105,15 +114,21 @@
 }
 
 .gd6d-reviews__list {
-	display: flex;
+	display: flex !important;
+	flex-wrap: nowrap !important;
+	gap: 0 !important;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
 	overflow-x: auto;
+	overflow-y: hidden;
 	scroll-snap-type: x mandatory;
 	scroll-behavior: smooth;
 	scrollbar-width: none;
 	overscroll-behavior-inline: contain;
-	padding: 0;
-	margin: 0;
-	list-style: none;
+	padding: 0 !important;
+	margin: 0 !important;
+	list-style: none !important;
 }
 
 .gd6d-reviews__list::-webkit-scrollbar {
@@ -121,8 +136,12 @@
 }
 
 .gd6d-reviews__item {
-	flex: 0 0 100%;
-	min-width: 0;
+	flex: 0 0 100% !important;
+	width: 100% !important;
+	max-width: 100% !important;
+	min-width: 100% !important;
+	padding: 0 !important;
+	margin: 0 !important;
 	scroll-snap-align: start;
 	scroll-snap-stop: always;
 }
@@ -132,12 +151,15 @@
 	grid-template-columns: minmax(190px, .42fr) minmax(0, 1fr);
 	gap: clamp(1.5rem, 4vw, 3rem);
 	align-items: center;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
 	min-height: 260px;
 	padding: clamp(1.5rem, 4vw, 3rem);
 	border: 1px solid var(--gd6d-reviews-border);
 	border-radius: var(--gd6d-reviews-radius);
 	background: var(--gd6d-reviews-surface);
-	box-shadow: 0 10px 32px color-mix(in srgb, #000 6%, transparent);
+	box-shadow: none;
 }
 
 .gd6d-review__person {
@@ -191,7 +213,7 @@
 }
 
 .gd6d-review__quote {
-	margin: 0;
+	margin: 0 !important;
 	padding: 0;
 	border: 0;
 }
@@ -300,12 +322,12 @@
 	}
 
 	.gd6d-reviews__arrow--previous {
-		left: .35rem;
+		left: -1.35rem;
 		transform: translate(0, -50%);
 	}
 
 	.gd6d-reviews__arrow--next {
-		right: .35rem;
+		right: -1.35rem;
 		transform: translate(0, -50%);
 	}
 
