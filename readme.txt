@@ -16,7 +16,7 @@ Version 0.2.0 :
 * socle de l’extension ;
 * page Réglages > Avis Google ;
 * stockage dans une option unique ;
-* shortcode temporaire [gd6d_reviews] ;
+* shortcode temporaire  ;
 * test sécurisé de la connexion à Google Places API (New) ;
 * affichage du nom, de la note et du nombre d’avis dans l’administration ;
 * architecture prête pour le cache et l’affichage des avis.

@@ -1,0 +1,124 @@
+<?php
+/**
+ * Reviews block renderer.
+ *
+ * @package Gd6dReviews
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+final class GD6D_Reviews_Renderer {
+	public static function render( array $attributes = array() ): string {
+		$layout   = in_array( $attributes['layout'] ?? 'carousel', array( 'carousel', 'grid', 'badge' ), true ) ? $attributes['layout'] : 'carousel';
+		$language = 'en' === ( $attributes['language'] ?? 'fr' ) ? 'en' : 'fr';
+		$data     = GD6D_Reviews_Google_Provider::get_place_data( $language );
+
+		if ( is_wp_error( $data ) ) {
+			return current_user_can( 'manage_options' ) ? '<p class="gd6d-reviews__error">' . esc_html( $data->get_error_message() ) . '</p>' : '';
+		}
+
+		wp_enqueue_style( 'gd6d-reviews' );
+		if ( 'carousel' === $layout ) {
+			wp_enqueue_script( 'gd6d-reviews' );
+		}
+
+		$reviews = isset( $data['reviews'] ) && is_array( $data['reviews'] ) ? array_slice( $data['reviews'], 0, 5 ) : array();
+		$labels  = self::labels( $language );
+
+		if ( 'badge' === $layout ) {
+			return self::render_badge( $data, $labels, $language );
+		}
+
+		return self::render_reviews( $data, $reviews, $labels, $layout, $language );
+	}
+
+	private static function render_badge( array $data, array $labels, string $language ): string {
+		$rating = (float) ( $data['rating'] ?? 0 );
+		$count  = (int) ( $data['review_count'] ?? 0 );
+		ob_start();
+		?>
+		<div class="gd6d-reviews gd6d-reviews--badge" lang="<?php echo esc_attr( $language ); ?>">
+			<?php if ( ! empty( $data['maps_url'] ) ) : ?><a class="gd6d-reviews__badge-link" href="<?php echo esc_url( $data['maps_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php endif; ?>
+				<img class="gd6d-reviews__google-logo" src="<?php echo esc_url( GD6D_REVIEWS_URL . 'assets/images/google.svg' ); ?>" alt="Google" width="48" height="48" loading="lazy" decoding="async">
+				<span class="gd6d-reviews__badge-score"><strong><?php echo esc_html( number_format_i18n( $rating, 1 ) ); ?></strong><?php echo self::render_stars( (int) round( $rating ), 'gd6d-reviews__stars', sprintf( $labels['rating_label'], number_format_i18n( $rating, 1 ) ) ); ?></span>
+				<span class="gd6d-reviews__badge-count"><?php echo esc_html( sprintf( $labels['reviews_count'], number_format_i18n( $count ) ) ); ?></span>
+			<?php if ( ! empty( $data['maps_url'] ) ) : ?></a><?php endif; ?>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	private static function render_reviews( array $data, array $reviews, array $labels, string $layout, string $language ): string {
+		$rating = (float) ( $data['rating'] ?? 0 );
+		$count  = (int) ( $data['review_count'] ?? 0 );
+		$id     = wp_unique_id( 'gd6d-reviews-' );
+		ob_start();
+		?>
+		<section id="<?php echo esc_attr( $id ); ?>" class="gd6d-reviews gd6d-reviews--<?php echo esc_attr( $layout ); ?>" lang="<?php echo esc_attr( $language ); ?>" aria-label="<?php echo esc_attr( $labels['section'] ); ?>" <?php echo 'carousel' === $layout ? 'data-gd6d-reviews-carousel data-autoplay-delay="6000"' : ''; ?>>
+			<header class="gd6d-reviews__header">
+				<div class="gd6d-reviews__summary"><div class="gd6d-reviews__score"><?php echo self::render_stars( (int) round( $rating ), 'gd6d-reviews__stars', sprintf( $labels['rating_label'], number_format_i18n( $rating, 1 ) ) ); ?><strong class="gd6d-reviews__rating"><?php echo esc_html( number_format_i18n( $rating, 1 ) ); ?>/5</strong></div><p class="gd6d-reviews__count"><?php echo esc_html( sprintf( $labels['reviews_count'], number_format_i18n( $count ) ) ); ?></p></div>
+				<?php if ( ! empty( $data['maps_url'] ) ) : ?><a class="gd6d-reviews__button" href="<?php echo esc_url( $data['maps_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $labels['all_reviews'] ); ?> <span aria-hidden="true">↗</span></a><?php endif; ?>
+			</header>
+			<?php if ( $reviews ) : ?>
+			<div class="gd6d-reviews__carousel">
+				<?php if ( 'carousel' === $layout && count( $reviews ) > 1 ) : ?><button class="gd6d-reviews__arrow gd6d-reviews__arrow--previous" type="button" data-gd6d-reviews-previous aria-label="<?php echo esc_attr( $labels['previous'] ); ?>">←</button><?php endif; ?>
+				<div class="gd6d-reviews__viewport" <?php echo 'carousel' === $layout ? 'data-gd6d-reviews-viewport tabindex="0"' : ''; ?>><ul class="gd6d-reviews__list">
+				<?php foreach ( $reviews as $index => $review ) :
+					$author = $review['authorAttribution']['displayName'] ?? $labels['google_client'];
+					$url = $review['authorAttribution']['uri'] ?? '';
+					$photo = $review['authorAttribution']['photoUri'] ?? '';
+					$text = 'en' === $language ? ( $review['text']['text'] ?? $review['originalText']['text'] ?? '' ) : ( $review['originalText']['text'] ?? $review['text']['text'] ?? '' );
+					$item_rating = max( 0, min( 5, (int) ( $review['rating'] ?? 0 ) ) );
+					$date = self::format_date( $review['publishTime'] ?? '', $language );
+				?>
+				<li class="gd6d-reviews__item" <?php echo 'carousel' === $layout ? 'data-gd6d-reviews-slide' : ''; ?>><article class="gd6d-review"><div class="gd6d-review__person">
+				<?php if ( $photo ) : ?><img class="gd6d-review__avatar" src="<?php echo esc_url( $photo ); ?>" alt="" width="64" height="64" loading="lazy" decoding="async"><?php else : ?><span class="gd6d-review__avatar gd6d-review__avatar--fallback" aria-hidden="true"><?php echo esc_html( self::initial( $author ) ); ?></span><?php endif; ?>
+				<div class="gd6d-review__identity"><h3 class="gd6d-review__author"><?php if ( $url ) : ?><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $author ); ?></a><?php else : echo esc_html( $author ); endif; ?></h3><?php if ( $date ) : ?><p class="gd6d-review__date"><?php echo esc_html( $date ); ?></p><?php endif; ?><div class="gd6d-review__rating"><?php echo self::render_stars( $item_rating, 'gd6d-review__stars', sprintf( $labels['rating_int'], $item_rating ) ); ?></div></div></div>
+				<?php if ( $text ) : ?><blockquote class="gd6d-review__quote"><p class="gd6d-review__text"><?php echo esc_html( $text ); ?></p></blockquote><?php endif; ?>
+				</article></li>
+				<?php endforeach; ?></ul></div>
+				<?php if ( 'carousel' === $layout && count( $reviews ) > 1 ) : ?><button class="gd6d-reviews__arrow gd6d-reviews__arrow--next" type="button" data-gd6d-reviews-next aria-label="<?php echo esc_attr( $labels['next'] ); ?>">→</button><?php endif; ?>
+			</div>
+			<?php if ( 'carousel' === $layout && count( $reviews ) > 1 ) : ?><div class="gd6d-reviews__navigation"><div class="gd6d-reviews__dots" role="group" aria-label="<?php echo esc_attr( $labels['choose'] ); ?>"><?php foreach ( $reviews as $index => $_review ) : ?><button class="gd6d-reviews__dot<?php echo 0 === $index ? ' is-active' : ''; ?>" type="button" data-gd6d-reviews-dot="<?php echo esc_attr( (string) $index ); ?>" aria-label="<?php echo esc_attr( sprintf( $labels['show_review'], $index + 1 ) ); ?>" aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>"></button><?php endforeach; ?></div></div><?php endif; ?>
+			<?php endif; ?>
+		</section>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	private static function labels( string $language ): array {
+		if ( 'en' === $language ) {
+			return array( 'section' => 'Google reviews', 'rating_label' => 'Rating of %s out of 5.', 'rating_int' => 'Rating of %d out of 5.', 'reviews_count' => '%s Google reviews', 'all_reviews' => 'See all reviews', 'previous' => 'Previous review', 'next' => 'Next review', 'choose' => 'Choose a review', 'show_review' => 'Show review %d', 'google_client' => 'Google customer' );
+		}
+		return array( 'section' => 'Avis Google', 'rating_label' => 'Note de %s sur 5.', 'rating_int' => 'Note de %d sur 5.', 'reviews_count' => '%s avis Google', 'all_reviews' => 'Voir tous les avis', 'previous' => 'Avis précédent', 'next' => 'Avis suivant', 'choose' => 'Choisir un avis', 'show_review' => 'Afficher l’avis %d', 'google_client' => 'Client Google' );
+	}
+
+	private static function render_stars( int $rating, string $class, string $label ): string {
+		$html = '<span class="' . esc_attr( $class ) . '" role="img" aria-label="' . esc_attr( $label ) . '">';
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$html .= '<svg class="gd6d-star ' . ( $i <= $rating ? 'is-filled' : 'is-empty' ) . '" viewBox="0 0 24 24" width="18" height="18" focusable="false" aria-hidden="true"><path d="M12 2.7l2.84 5.75 6.35.92-4.6 4.48 1.09 6.33L12 17.19l-5.68 2.99 1.09-6.33-4.6-4.48 6.35-.92L12 2.7z"/></svg>';
+		}
+		return $html . '</span>';
+	}
+
+	private static function format_date( string $time, string $language ): string {
+		$timestamp = strtotime( $time );
+		if ( ! $timestamp ) { return ''; }
+		$seconds = max( 0, current_time( 'timestamp' ) - $timestamp );
+		$units = array( YEAR_IN_SECONDS => array( 'an', 'ans', 'year', 'years' ), MONTH_IN_SECONDS => array( 'mois', 'mois', 'month', 'months' ), WEEK_IN_SECONDS => array( 'semaine', 'semaines', 'week', 'weeks' ), DAY_IN_SECONDS => array( 'jour', 'jours', 'day', 'days' ) );
+		foreach ( $units as $duration => $names ) {
+			if ( $seconds >= $duration ) {
+				$value = (int) floor( $seconds / $duration );
+				$name = 'en' === $language ? ( 1 === $value ? $names[2] : $names[3] ) : ( 1 === $value ? $names[0] : $names[1] );
+				return 'en' === $language ? sprintf( '%d %s ago', $value, $name ) : sprintf( 'Il y a %d %s', $value, $name );
+			}
+		}
+		return 'en' === $language ? 'Today' : 'Aujourd’hui';
+	}
+
+	private static function initial( string $author ): string {
+		return function_exists( 'mb_substr' ) ? mb_strtoupper( mb_substr( trim( $author ), 0, 1 ) ) : strtoupper( substr( trim( $author ), 0, 1 ) );
+	}
+}

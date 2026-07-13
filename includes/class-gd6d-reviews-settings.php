@@ -104,7 +104,20 @@ final class GD6D_Reviews_Settings {
 	}
 
 	public function render_section_intro(): void {
-		echo '<p>' . esc_html__( 'Renseignez la clé API et le Place ID, enregistrez les réglages, puis testez la connexion.', 'gd6d-reviews' ) . '</p>';
+		$api_key_url  = 'https://console.cloud.google.com/google/maps-apis/credentials';
+		$place_id_url = 'https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder';
+
+		printf(
+			'<p>%1$s <a href="%2$s" target="_blank" rel="noopener noreferrer">%3$s<span class="screen-reader-text"> %4$s</span></a> %5$s <a href="%6$s" target="_blank" rel="noopener noreferrer">%7$s<span class="screen-reader-text"> %4$s</span></a>, %8$s</p>',
+			esc_html__( 'Renseignez la', 'gd6d-reviews' ),
+			esc_url( $api_key_url ),
+			esc_html__( 'clé API', 'gd6d-reviews' ),
+			esc_html__( '(nouvel onglet)', 'gd6d-reviews' ),
+			esc_html__( 'et le', 'gd6d-reviews' ),
+			esc_url( $place_id_url ),
+			esc_html__( 'Place ID', 'gd6d-reviews' ),
+			esc_html__( 'enregistrez les réglages, puis testez la connexion.', 'gd6d-reviews' )
+		);
 	}
 
 	public function render_field( array $args ): void {
@@ -314,9 +327,6 @@ final class GD6D_Reviews_Settings {
 				</form>
 			</div>
 
-			<hr>
-			<h2><?php esc_html_e( 'Shortcode', 'gd6d-reviews' ); ?></h2>
-			<code>[gd6d_reviews]</code>
 		</div>
 		<?php
 	}

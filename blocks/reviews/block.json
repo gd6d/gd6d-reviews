@@ -2,20 +2,21 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "gd6d/reviews",
-  "version": "0.5.0",
+  "version": "0.7.2",
   "title": "Avis Google",
   "category": "widgets",
   "icon": "star-filled",
   "description": "Affiche les avis Google configurés dans Réglages > Avis Google.",
   "keywords": ["avis", "google", "témoignages"],
   "textdomain": "gd6d-reviews",
+  "attributes": {
+    "layout": { "type": "string", "default": "carousel" },
+    "language": { "type": "string", "default": "fr" }
+  },
   "supports": {
     "html": false,
     "align": ["wide", "full"],
-    "spacing": {
-      "margin": true,
-      "padding": true
-    }
+    "spacing": { "margin": true, "padding": true }
   },
   "editorScript": "file:./editor.js",
   "style": "gd6d-reviews"
