@@ -46,41 +46,31 @@ final class GD6D_Reviews_Shortcode {
 		}
 
 		wp_enqueue_style( 'gd6d-reviews' );
+		wp_enqueue_script( 'gd6d-reviews' );
 
-		$settings = wp_parse_args(
-			get_option( GD6D_Reviews_Settings::OPTION_NAME, array() ),
-			GD6D_Reviews_Settings::defaults()
-		);
-
-		$atts = shortcode_atts(
-			array(
-				'count' => (int) $settings['review_count'],
-			),
-			is_array( $atts ) ? $atts : array(),
-			'gd6d_reviews'
-		);
-
-		$display_count = max( 1, min( 5, absint( $atts['count'] ) ) );
-		$reviews       = isset( $data['reviews'] ) && is_array( $data['reviews'] )
-			? array_slice( $data['reviews'], 0, $display_count )
+		$reviews = isset( $data['reviews'] ) && is_array( $data['reviews'] )
+			? array_slice( $data['reviews'], 0, 5 )
 			: array();
 
 		$rating       = isset( $data['rating'] ) ? (float) $data['rating'] : 0.0;
 		$review_count = isset( $data['review_count'] ) ? (int) $data['review_count'] : 0;
 
+		$carousel_id = wp_unique_id( 'gd6d-reviews-' );
+
 		ob_start();
 		?>
-		<section class="gd6d-reviews" aria-label="<?php esc_attr_e( 'Avis Google', 'gd6d-reviews' ); ?>">
+		<section
+			id="<?php echo esc_attr( $carousel_id ); ?>"
+			class="gd6d-reviews"
+			aria-label="<?php esc_attr_e( 'Avis Google', 'gd6d-reviews' ); ?>"
+			data-gd6d-reviews-carousel
+			data-autoplay-delay="6000"
+		>
 			<header class="gd6d-reviews__header">
 				<div class="gd6d-reviews__summary">
-					<p class="gd6d-reviews__eyebrow">
-						<span class="gd6d-reviews__google-mark" aria-hidden="true">G</span>
-						<?php esc_html_e( 'Avis Google', 'gd6d-reviews' ); ?>
-					</p>
-
 					<div class="gd6d-reviews__score">
-						<strong class="gd6d-reviews__rating"><?php echo esc_html( number_format_i18n( $rating, 1 ) ); ?></strong>
 						<?php echo $this->render_stars( (int) round( $rating ), 'gd6d-reviews__stars', sprintf( __( 'Note de %s sur 5.', 'gd6d-reviews' ), number_format_i18n( $rating, 1 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<strong class="gd6d-reviews__rating"><?php echo esc_html( number_format_i18n( $rating, 1 ) ); ?>/5</strong>
 					</div>
 
 					<p class="gd6d-reviews__count">
@@ -103,51 +93,82 @@ final class GD6D_Reviews_Shortcode {
 			</header>
 
 			<?php if ( ! empty( $reviews ) ) : ?>
-				<ul class="gd6d-reviews__list">
-					<?php foreach ( $reviews as $review ) : ?>
-						<?php
-						$author       = $review['authorAttribution']['displayName'] ?? __( 'Client Google', 'gd6d-reviews' );
-						$author_url   = $review['authorAttribution']['uri'] ?? '';
-						$author_photo = $review['authorAttribution']['photoUri'] ?? '';
-						$text         = $review['originalText']['text'] ?? $review['text']['text'] ?? '';
-						$item_rating  = isset( $review['rating'] ) ? max( 0, min( 5, (int) $review['rating'] ) ) : 0;
-						$date         = $this->format_relative_date( $review['publishTime'] ?? '' );
-						?>
-						<li class="gd6d-reviews__item">
-							<article class="gd6d-review">
-								<header class="gd6d-review__header">
-									<?php if ( $author_photo ) : ?>
-										<img class="gd6d-review__avatar" src="<?php echo esc_url( $author_photo ); ?>" alt="" width="48" height="48" loading="lazy" decoding="async">
-									<?php else : ?>
-										<span class="gd6d-review__avatar gd6d-review__avatar--fallback" aria-hidden="true"><?php echo esc_html( $this->get_initial( $author ) ); ?></span>
-									<?php endif; ?>
+				<div class="gd6d-reviews__carousel">
+					<?php if ( count( $reviews ) > 1 ) : ?>
+						<button class="gd6d-reviews__arrow gd6d-reviews__arrow--previous" type="button" data-gd6d-reviews-previous aria-label="<?php esc_attr_e( 'Avis précédent', 'gd6d-reviews' ); ?>">←</button>
+					<?php endif; ?>
 
-									<div class="gd6d-review__identity">
-										<h3 class="gd6d-review__author">
-											<?php if ( $author_url ) : ?>
-												<a href="<?php echo esc_url( $author_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $author ); ?></a>
-											<?php else : ?>
-												<?php echo esc_html( $author ); ?>
-											<?php endif; ?>
-										</h3>
-
-										<?php if ( $date ) : ?>
-											<p class="gd6d-review__date"><?php echo esc_html( $date ); ?></p>
+					<div class="gd6d-reviews__viewport" data-gd6d-reviews-viewport tabindex="0">
+						<ul class="gd6d-reviews__list">
+						<?php foreach ( $reviews as $index => $review ) : ?>
+							<?php
+							$author       = $review['authorAttribution']['displayName'] ?? __( 'Client Google', 'gd6d-reviews' );
+							$author_url   = $review['authorAttribution']['uri'] ?? '';
+							$author_photo = $review['authorAttribution']['photoUri'] ?? '';
+							$text         = $review['originalText']['text'] ?? $review['text']['text'] ?? '';
+							$item_rating  = isset( $review['rating'] ) ? max( 0, min( 5, (int) $review['rating'] ) ) : 0;
+							$date         = $this->format_relative_date( $review['publishTime'] ?? '' );
+							?>
+							<li class="gd6d-reviews__item" data-gd6d-reviews-slide aria-label="<?php echo esc_attr( sprintf( __( 'Avis %1$d sur %2$d', 'gd6d-reviews' ), $index + 1, count( $reviews ) ) ); ?>">
+								<article class="gd6d-review">
+									<div class="gd6d-review__person">
+										<?php if ( $author_photo ) : ?>
+											<img class="gd6d-review__avatar" src="<?php echo esc_url( $author_photo ); ?>" alt="" width="64" height="64" loading="lazy" decoding="async">
+										<?php else : ?>
+											<span class="gd6d-review__avatar gd6d-review__avatar--fallback" aria-hidden="true"><?php echo esc_html( $this->get_initial( $author ) ); ?></span>
 										<?php endif; ?>
+
+										<div class="gd6d-review__identity">
+											<h3 class="gd6d-review__author">
+												<?php if ( $author_url ) : ?>
+													<a href="<?php echo esc_url( $author_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $author ); ?></a>
+												<?php else : ?>
+													<?php echo esc_html( $author ); ?>
+												<?php endif; ?>
+											</h3>
+
+											<?php if ( $date ) : ?>
+												<p class="gd6d-review__date"><?php echo esc_html( $date ); ?></p>
+											<?php endif; ?>
+
+											<div class="gd6d-review__rating">
+												<?php echo $this->render_stars( $item_rating, 'gd6d-review__stars', sprintf( __( 'Note de %d sur 5.', 'gd6d-reviews' ), $item_rating ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+											</div>
+										</div>
 									</div>
-								</header>
 
-								<div class="gd6d-review__rating">
-									<?php echo $this->render_stars( $item_rating, 'gd6d-review__stars', sprintf( __( 'Note de %d sur 5.', 'gd6d-reviews' ), $item_rating ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</div>
+									<?php if ( $text ) : ?>
+										<blockquote class="gd6d-review__quote">
+											<p class="gd6d-review__text"><?php echo esc_html( $text ); ?></p>
+										</blockquote>
+									<?php endif; ?>
+								</article>
+							</li>
+						<?php endforeach; ?>
+						</ul>
+					</div>
 
-								<?php if ( $text ) : ?>
-									<p class="gd6d-review__text"><?php echo esc_html( $text ); ?></p>
-								<?php endif; ?>
-							</article>
-						</li>
-					<?php endforeach; ?>
-				</ul>
+					<?php if ( count( $reviews ) > 1 ) : ?>
+						<button class="gd6d-reviews__arrow gd6d-reviews__arrow--next" type="button" data-gd6d-reviews-next aria-label="<?php esc_attr_e( 'Avis suivant', 'gd6d-reviews' ); ?>">→</button>
+					<?php endif; ?>
+				</div>
+
+				<?php if ( count( $reviews ) > 1 ) : ?>
+					<div class="gd6d-reviews__navigation">
+						<div class="gd6d-reviews__dots" role="group" aria-label="<?php esc_attr_e( 'Choisir un avis', 'gd6d-reviews' ); ?>">
+							<?php foreach ( $reviews as $index => $review ) : // phpcs:ignore Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed ?>
+								<button
+									class="gd6d-reviews__dot<?php echo 0 === $index ? ' is-active' : ''; ?>"
+									type="button"
+									data-gd6d-reviews-dot="<?php echo esc_attr( (string) $index ); ?>"
+									aria-label="<?php echo esc_attr( sprintf( __( 'Afficher l’avis %d', 'gd6d-reviews' ), $index + 1 ) ); ?>"
+									aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+								></button>
+							<?php endforeach; ?>
+						</div>
+
+					</div>
+				<?php endif; ?>
 			<?php endif; ?>
 		</section>
 		<?php

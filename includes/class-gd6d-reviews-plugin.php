@@ -52,14 +52,25 @@ final class GD6D_Reviews_Plugin {
 		);
 	}
 
-	public function register_assets(): void {
-		wp_register_style(
-			'gd6d-reviews',
-			GD6D_REVIEWS_URL . 'assets/css/gd6d-reviews.css',
-			array(),
-			GD6D_REVIEWS_VERSION
-		);
-	}
+public function register_assets(): void {
+	$css_path = GD6D_REVIEWS_DIR . 'assets/css/gd6d-reviews.css';
+	$js_path  = GD6D_REVIEWS_DIR . 'assets/js/gd6d-reviews.js';
+
+	wp_register_style(
+		'gd6d-reviews',
+		GD6D_REVIEWS_URL . 'assets/css/gd6d-reviews.css',
+		array(),
+		file_exists( $css_path ) ? (string) filemtime( $css_path ) : GD6D_REVIEWS_VERSION
+	);
+
+	wp_register_script(
+		'gd6d-reviews',
+		GD6D_REVIEWS_URL . 'assets/js/gd6d-reviews.js',
+		array(),
+		file_exists( $js_path ) ? (string) filemtime( $js_path ) : GD6D_REVIEWS_VERSION,
+		true
+	);
+}
 
 	private function __construct() {}
 	private function __clone() {}
