@@ -397,6 +397,25 @@
 	padding: 1.5rem;
 }
 
+.gd6d-review__text{
+	display:-webkit-box;
+	-webkit-box-orient:vertical;
+	-webkit-line-clamp:4;
+	line-clamp:4;
+	overflow:hidden;
+}
+.gd6d-review__more{
+	margin-top:.75rem;
+	font-size:.9rem;
+	font-weight:600;
+}
+.gd6d-review__more a{
+	text-decoration:none;
+}
+.gd6d-review__more a:hover{
+	text-decoration:underline;
+}
+
 /* Compact badge layout. */
 .gd6d-reviews--badge {
 	display: inline-block;

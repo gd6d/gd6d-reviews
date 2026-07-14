@@ -126,13 +126,31 @@ final class GD6D_Reviews_Renderer {
 					$url = $review['authorAttribution']['uri'] ?? '';
 					$photo = $review['authorAttribution']['photoUri'] ?? '';
 					$text = 'en' === $language ? ( $review['text']['text'] ?? $review['originalText']['text'] ?? '' ) : ( $review['originalText']['text'] ?? $review['text']['text'] ?? '' );
+					$review_url = $review['googleMapsUri'] ?? ( $place['googleMapsUri'] ?? '' );
+					$show_read_more = mb_strlen( wp_strip_all_tags( $text ) ) > 260;
 					$item_rating = max( 0, min( 5, (int) ( $review['rating'] ?? 0 ) ) );
 					$date = self::format_date( $review['publishTime'] ?? '', $language );
 				?>
 				<li class="gd6d-reviews__item" <?php echo 'carousel' === $layout ? 'data-gd6d-reviews-slide' : ''; ?>><article class="gd6d-review"><div class="gd6d-review__person">
 				<?php if ( $photo ) : ?><img class="gd6d-review__avatar" src="<?php echo esc_url( $photo ); ?>" alt="" width="64" height="64" loading="lazy" decoding="async"><?php else : ?><span class="gd6d-review__avatar gd6d-review__avatar--fallback" aria-hidden="true"><?php echo esc_html( self::initial( $author ) ); ?></span><?php endif; ?>
 				<div class="gd6d-review__identity"><h3 class="gd6d-review__author"><?php if ( $url ) : ?><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $author ); ?></a><?php else : echo esc_html( $author ); endif; ?></h3><?php if ( $date ) : ?><p class="gd6d-review__date"><?php echo esc_html( $date ); ?></p><?php endif; ?><div class="gd6d-review__rating"><?php echo self::render_stars( $item_rating, 'gd6d-review__stars', sprintf( $labels['rating_int'], $item_rating ) ); ?></div></div></div>
-				<?php if ( $text ) : ?><blockquote class="gd6d-review__quote"><p class="gd6d-review__text"><?php echo esc_html( $text ); ?></p></blockquote><?php endif; ?>
+				<?php if ( $text ) : ?>
+<blockquote class="gd6d-review__quote">
+	<p class="gd6d-review__text">
+		<?php echo esc_html( $text ); ?>
+	</p>
+	<?php if ( $show_read_more && $review_url ) : ?>
+	<p class="gd6d-review__more">
+		<a
+			href="<?php echo esc_url( $review_url ); ?>"
+			target="_blank"
+			rel="noopener noreferrer">
+			<?php echo 'en' === $language ? 'Read on Google ↗' : 'Lire l’avis sur Google ↗'; ?>
+		</a>
+	</p>
+	<?php endif; ?>
+</blockquote>
+<?php endif; ?>
 				</article></li>
 				<?php endforeach; ?></ul></div>
 				<?php if ( 'carousel' === $layout && count( $reviews ) > 1 ) : ?><button class="gd6d-reviews__arrow gd6d-reviews__arrow--next" type="button" data-gd6d-reviews-next aria-label="<?php echo esc_attr( $labels['next'] ); ?>">→</button><?php endif; ?>
