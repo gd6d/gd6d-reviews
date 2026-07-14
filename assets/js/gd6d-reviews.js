@@ -11,14 +11,19 @@
 		const previous = carousel.querySelector('[data-gd6d-reviews-previous]');
 		const next = carousel.querySelector('[data-gd6d-reviews-next]');
 
-		if (!viewport || slides.length < 2) {
+		if (!viewport || !track || slides.length < 2) {
 			return;
 		}
 
 		let activeIndex = 0;
 		let timer = null;
 		let paused = false;
-		const delay = Number.parseInt(carousel.dataset.autoplayDelay || '6000', 10);
+		let resizeTimer = null;
+
+		const delay = Number.parseInt(
+			carousel.dataset.autoplayDelay || '6000',
+			10
+		);
 
 		const updateDots = (index) => {
 			dots.forEach((dot, dotIndex) => {
@@ -29,15 +34,15 @@
 		};
 
 		const goTo = (index, smooth = true) => {
-	activeIndex = (index + slides.length) % slides.length;
+			activeIndex = (index + slides.length) % slides.length;
 
-	track.scrollTo({
-		left: slides[activeIndex].offsetLeft,
-		behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
-	});
+			track.scrollTo({
+				left: slides[activeIndex].offsetLeft,
+				behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
+			});
 
-	updateDots(activeIndex);
-};
+			updateDots(activeIndex);
+		};
 
 		const stop = () => {
 			if (timer) {
@@ -48,8 +53,11 @@
 
 		const start = () => {
 			stop();
+
 			if (!reducedMotion && !paused) {
-				timer = window.setInterval(() => goTo(activeIndex + 1), delay);
+				timer = window.setInterval(() => {
+					goTo(activeIndex + 1);
+				}, delay);
 			}
 		};
 
@@ -93,24 +101,52 @@
 		});
 
 		track.addEventListener('scrollend', () => {
-	const trackLeft = track.getBoundingClientRect().left;
-	let closestIndex = 0;
-	let closestDistance = Number.POSITIVE_INFINITY;
+			const trackLeft = track.getBoundingClientRect().left;
 
-	slides.forEach((slide, index) => {
-		const distance = Math.abs(
-			slide.getBoundingClientRect().left - trackLeft
-		);
+			let closestIndex = 0;
+			let closestDistance = Number.POSITIVE_INFINITY;
 
-		if (distance < closestDistance) {
-			closestDistance = distance;
-			closestIndex = index;
+			slides.forEach((slide, index) => {
+				const distance = Math.abs(
+					slide.getBoundingClientRect().left - trackLeft
+				);
+
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					closestIndex = index;
+				}
+			});
+
+			activeIndex = closestIndex;
+			updateDots(activeIndex);
+		});
+
+		function updateReadMore() {
+
+			carousel.querySelectorAll('.gd6d-review').forEach((review) => {
+
+				const text = review.querySelector('.gd6d-review__text');
+				const more = review.querySelector('.gd6d-review__more');
+
+				if (!text || !more) {
+					return;
+				}
+
+				more.hidden = text.scrollHeight <= text.clientHeight + 2;
+
+			});
+
 		}
-	});
 
-	activeIndex = closestIndex;
-	updateDots(activeIndex);
-});
+		requestAnimationFrame(updateReadMore);
+
+		window.addEventListener('resize', () => {
+
+			clearTimeout(resizeTimer);
+
+			resizeTimer = setTimeout(updateReadMore, 150);
+
+		});
 
 		start();
 	});
