@@ -3,7 +3,7 @@
  * Plugin Name:       Gd6d Reviews
  * Plugin URI:        https://gd6d.fr/
  * Description:       Affiche des avis clients depuis Google Places avec un cache WordPress.
- * Version:           0.7.2
+ * Version:           0.7.3
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Author:            Gd6d

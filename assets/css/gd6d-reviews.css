@@ -201,7 +201,7 @@
 
 .gd6d-review__author {
 	margin: 0 0 .15rem;
-	font-family: var(--gd6d-reviews-font);
+	font-family: var(--gd6d-reviews-font) !important;
 	font-size: 1.05rem;
 	font-weight: 720;
 	line-height: 1.25;

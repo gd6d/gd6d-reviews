@@ -5,6 +5,7 @@
 
 	document.querySelectorAll('[data-gd6d-reviews-carousel]').forEach((carousel) => {
 		const viewport = carousel.querySelector('[data-gd6d-reviews-viewport]');
+		const track = carousel.querySelector('.gd6d-reviews__list');
 		const slides = [...carousel.querySelectorAll('[data-gd6d-reviews-slide]')];
 		const dots = [...carousel.querySelectorAll('[data-gd6d-reviews-dot]')];
 		const previous = carousel.querySelector('[data-gd6d-reviews-previous]');
@@ -28,14 +29,15 @@
 		};
 
 		const goTo = (index, smooth = true) => {
-			activeIndex = (index + slides.length) % slides.length;
-			slides[activeIndex].scrollIntoView({
-				behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
-				block: 'nearest',
-				inline: 'start',
-			});
-			updateDots(activeIndex);
-		};
+	activeIndex = (index + slides.length) % slides.length;
+
+	track.scrollTo({
+		left: slides[activeIndex].offsetLeft,
+		behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
+	});
+
+	updateDots(activeIndex);
+};
 
 		const stop = () => {
 			if (timer) {
@@ -90,22 +92,25 @@
 			}
 		});
 
-		viewport.addEventListener('scrollend', () => {
-			const viewportLeft = viewport.getBoundingClientRect().left;
-			let closestIndex = 0;
-			let closestDistance = Number.POSITIVE_INFINITY;
+		track.addEventListener('scrollend', () => {
+	const trackLeft = track.getBoundingClientRect().left;
+	let closestIndex = 0;
+	let closestDistance = Number.POSITIVE_INFINITY;
 
-			slides.forEach((slide, index) => {
-				const distance = Math.abs(slide.getBoundingClientRect().left - viewportLeft);
-				if (distance < closestDistance) {
-					closestDistance = distance;
-					closestIndex = index;
-				}
-			});
+	slides.forEach((slide, index) => {
+		const distance = Math.abs(
+			slide.getBoundingClientRect().left - trackLeft
+		);
 
-			activeIndex = closestIndex;
-			updateDots(activeIndex);
-		});
+		if (distance < closestDistance) {
+			closestDistance = distance;
+			closestIndex = index;
+		}
+	});
+
+	activeIndex = closestIndex;
+	updateDots(activeIndex);
+});
 
 		start();
 	});
